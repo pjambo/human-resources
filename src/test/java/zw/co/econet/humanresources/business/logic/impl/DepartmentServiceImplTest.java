@@ -14,6 +14,8 @@ import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -93,4 +95,41 @@ public class DepartmentServiceImplTest {
         assertThat(departmentResponse.getMessage()).isEqualTo("Department created successfully");
         assertThat(departmentResponse.isSuccess()).isTrue();
     }
+
+
+    @Test
+    public void shouldFailFindDepartmentByIdIfIdIsNull(){
+        departmentResponse = departmentService.findById(null);
+        verify(departmentRepository, times(0)).findById(anyLong());
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(400);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Invalid Department search request.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldReturnDepartmentNotFoundIfInvalidId(){
+        when(departmentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        departmentResponse = departmentService.findById(2L);
+
+        verify(departmentRepository, times(1)).findById(anyLong());
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(404);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department not found.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldReturnDepartment(){
+        when(departmentRepository.findById(anyLong())).thenReturn(Optional.of(department));
+        when(departmentMapper.map(any(Department.class))).thenReturn(departmentDto);
+
+        departmentResponse = departmentService.findById(1L);
+
+        verify(departmentRepository, times(1)).findById(anyLong());
+        assertThat(departmentResponse.getData()).isEqualTo(departmentDto);
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(200);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department retrieved successfully");
+        assertThat(departmentResponse.isSuccess()).isTrue();
+    }
+
 }

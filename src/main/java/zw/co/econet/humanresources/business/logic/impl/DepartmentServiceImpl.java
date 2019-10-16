@@ -10,6 +10,8 @@ import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
 
+import java.util.Optional;
+
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
@@ -44,10 +46,36 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentResponse;
     }
 
+
     @Override
     public DepartmentResponse findById(Long id) {
-        return null;
+        log.info("Incoming request to find department by ID: {}", id);
+
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+        if (id == null) {
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Invalid Department search request.");
+            return departmentResponse;
+        }
+
+        Optional<Department> departmentSearched = departmentRepository.findById(id);
+        if (!departmentSearched.isPresent()){
+            departmentResponse.setStatusCode(404);
+            departmentResponse.setMessage("Department not found.");
+            return departmentResponse;
+        }
+
+        DepartmentDto departmentDto = departmentMapper.map(departmentSearched.get());
+        departmentResponse.setStatusCode(200);
+        departmentResponse.setMessage("Department retrieved successfully");
+        departmentResponse.setSuccess(true);
+        departmentResponse.setData(departmentDto);
+
+        log.info("Outgoing response of find department by ID: {}", departmentResponse);
+
+        return departmentResponse;
     }
+
 
     @Override
     public DepartmentListResponse findAll() {
