@@ -3,9 +3,11 @@ package zw.co.econet.humanresources.business.logic.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zw.co.econet.humanresources.business.logic.api.DepartmentService;
+import zw.co.econet.humanresources.domain.Department;
 import zw.co.econet.humanresources.repository.DepartmentRepository;
 import zw.co.econet.humanresources.utils.mapper.DepartmentMapper;
 import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
+import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
 
 public class DepartmentServiceImpl implements DepartmentService {
@@ -22,8 +24,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public DepartmentResponse save(DepartmentDto department) {
-        return null;
+    public DepartmentResponse save(DepartmentDto departmentDto) {
+        log.info("Incoming request to create department: {}", departmentDto);
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+        if(departmentDto == null || departmentDto.getName() == null || departmentDto.getName().trim().equals("")) {
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Invalid Department creation request.");
+            return departmentResponse;
+        }
+
+        Department departmentMapped = departmentMapper.map(departmentDto);
+        Department newDepartment = departmentRepository.save(departmentMapped);
+        DepartmentDto newDepartmentDto = departmentMapper.map(newDepartment);
+        departmentResponse.setStatusCode(201);
+        departmentResponse.setMessage("Department created successfully");
+        departmentResponse.setSuccess(true);
+        departmentResponse.setData(newDepartmentDto);
+        log.info("Outgoing response of  department creation: {}", departmentResponse);
+        return departmentResponse;
     }
 
     @Override
@@ -32,7 +50,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public DepartmentResponse findAll() {
+    public DepartmentListResponse findAll() {
         return null;
     }
 
