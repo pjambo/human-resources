@@ -159,4 +159,48 @@ public class DepartmentServiceImplTest {
         assertThat(departmentListResponse.getMessage()).isEqualTo("Departments retrieved successfully");
         assertThat(departmentListResponse.isSuccess()).isTrue();
     }
+
+
+    @Test
+    public void shouldFailUpdateDepartmentIfDepartmentIsNull(){
+        departmentResponse = departmentService.update(1L, null);
+
+        verify(departmentRepository, times(0)).save(any(Department.class));
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(400);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Invalid Department update request.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldFailUpdateDepartmentIfDepartmentNotFound(){
+        when(departmentRepository.findByIdAndStatusNot(anyLong(), any(EntityStatus.class)))
+                .thenReturn(Optional.empty());
+
+        departmentResponse = departmentService.update(1L, departmentDto);
+
+        verify(departmentRepository, times(1))
+                .findByIdAndStatusNot(anyLong(), any(EntityStatus.class));
+        verify(departmentRepository, times(0)).save(any(Department.class));
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(400);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department not found.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldUpdateDepartment(){
+        when(departmentRepository.findByIdAndStatusNot(anyLong(), any(EntityStatus.class)))
+                .thenReturn(Optional.of(department));
+        when(departmentRepository.save(any(Department.class))).thenReturn(department);
+        when(departmentMapper.map(any(Department.class))).thenReturn(departmentDto);
+
+        departmentResponse = departmentService.update(1L, departmentDto);
+
+        verify(departmentRepository, times(1)).findByIdAndStatusNot(anyLong(), any(EntityStatus.class));
+        verify(departmentRepository, times(1)).save(any(Department.class));
+        verify(departmentMapper, times(1)).map(any(Department.class));
+        assertThat(departmentResponse.getData()).isEqualTo(departmentDto);
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(200);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department updated successfully");
+        assertThat(departmentResponse.isSuccess()).isTrue();
+    }
 }

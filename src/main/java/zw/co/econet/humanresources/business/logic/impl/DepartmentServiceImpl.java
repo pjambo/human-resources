@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import zw.co.econet.humanresources.business.logic.api.DepartmentService;
 import zw.co.econet.humanresources.domain.Department;
 import zw.co.econet.humanresources.repository.DepartmentRepository;
+import zw.co.econet.humanresources.utils.enums.EntityStatus;
 import zw.co.econet.humanresources.utils.mapper.DepartmentMapper;
 import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
@@ -76,7 +77,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         return departmentResponse;
     }
-    
+
     @Override
     public DepartmentListResponse findAll() {
         log.info("Incoming request to find all departments");
@@ -101,9 +102,35 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentListResponse;
     }
 
+
     @Override
-    public DepartmentResponse update(Long id, DepartmentDto department) {
-        return null;
+    public DepartmentResponse update(Long id, DepartmentDto departmentDto) {
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+
+        if(departmentDto == null || departmentDto.getName() == null) {
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Invalid Department update request.");
+            return departmentResponse;
+        }
+        Optional<Department> fetchedDepartment = departmentRepository
+                .findByIdAndStatusNot(id, EntityStatus.DELETED);
+        if (!fetchedDepartment.isPresent()) {
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Department not found.");
+            return departmentResponse;
+        }
+
+        Department departmentToBeUpdated = fetchedDepartment.get();
+        departmentToBeUpdated.setName(departmentDto.getName());
+
+        Department updatedDepartment = departmentRepository.save(departmentToBeUpdated);
+        DepartmentDto updatedDepartmentDto = departmentMapper.map(updatedDepartment);
+        departmentResponse.setData(updatedDepartmentDto);
+        departmentResponse.setStatusCode(200);
+        departmentResponse.setMessage("Department updated successfully");
+        departmentResponse.setSuccess(true);
+        log.info("Outgoing response of  department update: {}", departmentResponse);
+        return departmentResponse;
     }
 
     @Override
