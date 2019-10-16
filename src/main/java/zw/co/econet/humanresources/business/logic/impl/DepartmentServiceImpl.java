@@ -10,6 +10,7 @@ import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 public class DepartmentServiceImpl implements DepartmentService {
@@ -75,11 +76,29 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         return departmentResponse;
     }
-
-
+    
     @Override
     public DepartmentListResponse findAll() {
-        return null;
+        log.info("Incoming request to find all departments");
+
+        DepartmentListResponse departmentListResponse = new DepartmentListResponse();
+
+        List<Department> departmentsSearched = departmentRepository.findAll();
+        if (departmentsSearched.isEmpty()){
+            departmentListResponse.setStatusCode(404);
+            departmentListResponse.setMessage("Departments not found.");
+            return departmentListResponse;
+        }
+
+        List<DepartmentDto> departmentDtos = departmentMapper.map(departmentsSearched);
+        departmentListResponse.setStatusCode(200);
+        departmentListResponse.setMessage("Departments retrieved successfully");
+        departmentListResponse.setSuccess(true);
+        departmentListResponse.setData(departmentDtos);
+
+        log.info("Outgoing response of find all departments: {} Departments", departmentListResponse.getData().size());
+
+        return departmentListResponse;
     }
 
     @Override

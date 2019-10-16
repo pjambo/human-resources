@@ -14,6 +14,8 @@ import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentListResponse;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -132,4 +134,29 @@ public class DepartmentServiceImplTest {
         assertThat(departmentResponse.isSuccess()).isTrue();
     }
 
+    @Test
+    public void shouldReturnDepartmentsNotFound(){
+        when(departmentRepository.findAll()).thenReturn(new ArrayList<Department>());
+
+        departmentListResponse = departmentService.findAll();
+
+        verify(departmentRepository, times(1)).findAll();
+        assertThat(departmentListResponse.getStatusCode()).isEqualTo(404);
+        assertThat(departmentListResponse.getMessage()).isEqualTo("Departments not found.");
+        assertThat(departmentListResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldReturnDepartments(){
+        when(departmentRepository.findAll()).thenReturn(Collections.singletonList(department));
+        when(departmentMapper.map(anyList())).thenReturn(Collections.singletonList(departmentDto));
+
+        departmentListResponse = departmentService.findAll();
+
+        verify(departmentRepository, times(1)).findAll();
+        assertThat(departmentListResponse.getData().size()).isEqualTo(1);
+        assertThat(departmentListResponse.getStatusCode()).isEqualTo(200);
+        assertThat(departmentListResponse.getMessage()).isEqualTo("Departments retrieved successfully");
+        assertThat(departmentListResponse.isSuccess()).isTrue();
+    }
 }
