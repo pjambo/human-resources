@@ -2,8 +2,11 @@ package zw.co.econet.humanresources.utils.messages.dto;
 
 import zw.co.econet.humanresources.utils.enums.EntityStatus;
 
+import javax.validation.constraints.NotBlank;
+
 public class DepartmentDto {
     private Long id;
+    @NotBlank(message = "Name is mandatory")
     private String name;
     private EntityStatus status;
 
