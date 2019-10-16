@@ -1,4 +1,4 @@
-package zw.co.econet.humanresources.business.api;
+package zw.co.econet.humanresources.business.logic.api;
 
 import zw.co.econet.humanresources.utils.messages.dto.DepartmentDto;
 import zw.co.econet.humanresources.utils.messages.external.DepartmentResponse;
