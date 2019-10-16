@@ -104,4 +104,54 @@ public class EmployeeDto {
                 ", status=" + status +
                 '}';
     }
+
+
+    public static final class Builder {
+        private Long id;
+        private String firstName;
+        private String lastName;
+        private String employeeNumber;
+        private String nationalID;
+        private DepartmentDto department;
+        private EntityStatus status;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder firstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder lastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder employeeNumber(String employeeNumber) {
+            this.employeeNumber = employeeNumber;
+            return this;
+        }
+
+        public Builder nationalID(String nationalID) {
+            this.nationalID = nationalID;
+            return this;
+        }
+
+        public Builder department(DepartmentDto department) {
+            this.department = department;
+            return this;
+        }
+
+        public Builder status(EntityStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public EmployeeDto build() {
+            return new EmployeeDto(id, firstName, lastName, employeeNumber, nationalID, department, status);
+        }
+    }
 }

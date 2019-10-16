@@ -51,4 +51,29 @@ public class DepartmentDto {
                 ", status=" + status +
                 '}';
     }
+
+    public static final class Builder {
+        private Long id;
+        private String name;
+        private EntityStatus status;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder status(EntityStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public DepartmentDto build() {
+            return new DepartmentDto(id, name, status);
+        }
+    }
 }
