@@ -203,4 +203,48 @@ public class DepartmentServiceImplTest {
         assertThat(departmentResponse.getMessage()).isEqualTo("Department updated successfully");
         assertThat(departmentResponse.isSuccess()).isTrue();
     }
+
+    @Test
+    public void shouldFailDeleteDepartmentIfIdIsNull(){
+        departmentResponse = departmentService.delete(null);
+
+        verify(departmentRepository, times(0)).delete(any(Department.class));
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(400);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Invalid Department ID.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldFailDeleteDepartmentIfDepartmentNotFound(){
+        when(departmentRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        departmentResponse = departmentService.delete(1L);
+
+        verify(departmentRepository, times(1)).findById(anyLong());
+        verify(departmentRepository, times(0)).delete(any(Department.class));
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(400);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department not found.");
+        assertThat(departmentResponse.isSuccess()).isFalse();
+    }
+
+    @Test
+    public void shouldDeleteDepartment(){
+        departmentDto.setStatus(EntityStatus.DELETED);
+        when(departmentRepository.findById(anyLong()))
+                .thenReturn(Optional.of(department));
+        when(departmentRepository.save(any(Department.class))).thenReturn(department);
+        when(departmentMapper.map(any(Department.class))).thenReturn(departmentDto);
+
+        departmentResponse = departmentService.delete(1L);
+
+        verify(departmentRepository, times(1)).findById(anyLong());
+        verify(departmentRepository, times(1)).save(any(Department.class));
+        verify(departmentMapper, times(1)).map(any(Department.class));
+        assertThat(departmentResponse.getData()).isEqualTo(departmentDto);
+        assertThat(departmentResponse.getData().getStatus()).isEqualTo(EntityStatus.DELETED);
+        assertThat(departmentResponse.getStatusCode()).isEqualTo(200);
+        assertThat(departmentResponse.getMessage()).isEqualTo("Department deleted successfully");
+        assertThat(departmentResponse.isSuccess()).isTrue();
+    }
 }

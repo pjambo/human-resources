@@ -132,9 +132,33 @@ public class DepartmentServiceImpl implements DepartmentService {
         log.info("Outgoing response of  department update: {}", departmentResponse);
         return departmentResponse;
     }
-
+    
     @Override
     public DepartmentResponse delete(Long id) {
-        return null;
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+        if (id == null){
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Invalid Department ID.");
+            return departmentResponse;
+        }
+
+        Optional<Department> fetchedDepartment = departmentRepository.findById(id);
+        if (!fetchedDepartment.isPresent()) {
+            departmentResponse.setStatusCode(400);
+            departmentResponse.setMessage("Department not found.");
+            return departmentResponse;
+        }
+
+        Department departmentToBeDeleted = fetchedDepartment.get();
+        departmentToBeDeleted.setStatus(EntityStatus.DELETED);
+
+        Department deletedDepartment = departmentRepository.save(departmentToBeDeleted);
+        DepartmentDto deletedDepartmentDto = departmentMapper.map(deletedDepartment);
+        departmentResponse.setData(deletedDepartmentDto);
+        departmentResponse.setStatusCode(200);
+        departmentResponse.setMessage("Department deleted successfully");
+        departmentResponse.setSuccess(true);
+        log.info("Outgoing response of  department delete: {}", departmentResponse);
+        return departmentResponse;
     }
 }
