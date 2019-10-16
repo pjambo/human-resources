@@ -132,7 +132,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         log.info("Outgoing response of  department update: {}", departmentResponse);
         return departmentResponse;
     }
-    
+
     @Override
     public DepartmentResponse delete(Long id) {
         DepartmentResponse departmentResponse = new DepartmentResponse();
